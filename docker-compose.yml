@@ -12,12 +12,22 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: outline
+  # s3:
+  #   image: lphoward/fake-s3
+  #   ports:
+  #     - "4569:4569"
+  #   volumes:
+  #     - ./fakes3:/fakes3_root
   s3:
-    image: lphoward/fake-s3
-    ports:
-      - "4569:4569"
+    image: minio/minio
     volumes:
-      - ./fakes3:/fakes3_root
+      - ./fakes3:/data
+    ports:
+      - "4569:9000"
+    command: server /data
+    environment:
+      MINIO_ACCESS_KEY: minio_token
+      MINIO_SECRET_KEY: minio_token
   outline:
     image: outline:v001
     command: yarn dev

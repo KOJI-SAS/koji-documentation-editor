@@ -27,27 +27,11 @@ export function slackAuth(
 }
 
 export function githubUrl(): string {
-  return "https://www.github.com/outline";
+  return "https://www.github.com/KOJI-SAS/koji-documentation-editor";
 }
 
 export function githubIssuesUrl(): string {
-  return "https://www.github.com/outline/outline/issues";
-}
-
-export function twitterUrl(): string {
-  return "https://twitter.com/outlinewiki";
-}
-
-export function mailToUrl(): string {
-  return "mailto:hello@getoutline.com";
-}
-
-export function developers(): string {
-  return `https://www.getoutline.com/developers`;
-}
-
-export function changelog(): string {
-  return `https://www.getoutline.com/changelog`;
+  return "https://www.github.com/KOJI-SAS/koji-documentation-editor/issues";
 }
 
 export function signin(service: string = "slack"): string {

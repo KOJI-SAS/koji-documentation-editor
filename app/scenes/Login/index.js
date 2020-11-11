@@ -103,7 +103,11 @@ class Login extends React.Component<Props, State> {
           <PageTitle title="Login" />
           <Logo>
             {env.TEAM_LOGO && env.DEPLOYMENT !== "hosted" ? (
-              <TeamLogo src={env.TEAM_LOGO} />
+              <TeamLogo
+                height={90}
+                theme={{ divider: "none" }}
+                src={env.TEAM_LOGO}
+              />
             ) : (
               <OutlineLogo size={38} fill="currentColor" />
             )}
@@ -112,7 +116,7 @@ class Login extends React.Component<Props, State> {
           {isCreate ? (
             <Heading centered>Create an account</Heading>
           ) : (
-            <Heading centered>Login to {config.name || "Outline"}</Heading>
+            <Heading centered>Login to {config.name || "KOJI"}</Heading>
           )}
 
           <Notices notice={getQueryVariable("notice")} />
@@ -174,7 +178,7 @@ const Background = styled(Fade)`
 
 const Logo = styled.div`
   margin-bottom: -1.5em;
-  height: 38px;
+  height: 90px;
 `;
 
 const Note = styled(HelpText)`

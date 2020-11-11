@@ -11,13 +11,7 @@ import KeyboardShortcuts from "scenes/KeyboardShortcuts";
 import { DropdownMenu, DropdownMenuItem } from "components/DropdownMenu";
 import Flex from "components/Flex";
 import Modal from "components/Modal";
-import {
-  developers,
-  changelog,
-  githubIssuesUrl,
-  mailToUrl,
-  settings,
-} from "../../shared/utils/routeHelpers";
+import { githubIssuesUrl, settings } from "../../shared/utils/routeHelpers";
 
 type Props = {
   label: React.Node,
@@ -63,16 +57,7 @@ class AccountMenu extends React.Component<Props> {
           <DropdownMenuItem onClick={this.handleOpenKeyboardShortcuts}>
             Keyboard shortcuts
           </DropdownMenuItem>
-          <DropdownMenuItem href={developers()} target="_blank">
-            API documentation
-          </DropdownMenuItem>
           <hr />
-          <DropdownMenuItem href={changelog()} target="_blank">
-            Changelog
-          </DropdownMenuItem>
-          <DropdownMenuItem href={mailToUrl()} target="_blank">
-            Send us feedback
-          </DropdownMenuItem>
           <DropdownMenuItem href={githubIssuesUrl()} target="_blank">
             Report a bug
           </DropdownMenuItem>

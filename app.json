@@ -1,8 +1,8 @@
 {
-  "name": "Outline",
-  "description": "Open source wiki and knowledge base for growing teams",
-  "website": "https://www.getoutline.com/",
-  "repository": "https://github.com/outline/outline",
+  "name": "Koji Documentation",
+  "description": "Koji Documentation editor based on Outline",
+  "website": "https://koji.fr",
+  "repository": "https://github.com/koji-sas/koji-documentation-editor",
   "keywords": [
     "wiki",
     "team",

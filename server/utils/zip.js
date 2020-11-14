@@ -4,12 +4,23 @@ import * as Sentry from "@sentry/node";
 import JSZip from "jszip";
 import tmp from "tmp";
 import { Attachment, Collection, Document } from "../models";
+import { presentCollection } from "../presenters";
 import { getImageByKey } from "./s3";
 
-async function addToArchive(zip, documents) {
-  for (const doc of documents) {
+async function addToArchive(zip, documents, parentDocument) {
+  for (const [index, doc] of documents.entries()) {
     const document = await Document.findByPk(doc.id);
     let text = document.toMarkdown();
+
+    text = text.split("\n").splice(2).join("\n");
+
+    const metadata = {
+      position: index,
+      category: `'${parentDocument ? parentDocument.title : ""}'`,
+      title: `'${doc.title}'`,
+    };
+    const data = Object.keys(metadata).map((key) => `${key}: ${metadata[key]}`);
+    text = ["---", ...data, "---", "\n"].join("\n");
 
     const attachments = await Attachment.findAll({
       where: { documentId: document.id },
@@ -24,7 +35,7 @@ async function addToArchive(zip, documents) {
 
     if (doc.children && doc.children.length) {
       const folder = zip.folder(document.title);
-      await addToArchive(folder, doc.children);
+      await addToArchive(folder, doc.children, doc);
     }
   }
 }
@@ -62,6 +73,8 @@ export async function archiveCollection(collection: Collection) {
   if (collection.documentStructure) {
     await addToArchive(zip, collection.documentStructure);
   }
+
+  zip.file("collection.json", JSON.stringify(presentCollection(collection)));
 
   return archiveToPath(zip);
 }

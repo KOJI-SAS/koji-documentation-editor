@@ -6,7 +6,7 @@ describe("Mailer", () => {
   let sendMailOutput;
 
   beforeEach(() => {
-    process.env.URL = "http://localhost:3000";
+    process.env.URL = "http://localhost:8585";
     process.env.SMTP_FROM_EMAIL = "hello@example.com";
     jest.resetModules();
 

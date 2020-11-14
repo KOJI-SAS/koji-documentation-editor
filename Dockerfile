@@ -20,4 +20,4 @@ RUN yarn build && \
 ENV NODE_ENV production
 CMD yarn start
 
-EXPOSE 3000
+EXPOSE 8585

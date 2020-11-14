@@ -70,7 +70,7 @@ In development you can quickly get an environment running using Docker by follow
     1. `SLACK_KEY` (this is called "Client ID" in Slack admin)
     1. `SLACK_SECRET` (this is called "Client Secret" in Slack admin)
 1. Configure your Slack app's Oauth & Permissions settings 
-    1. Add `http://localhost:3000/auth/slack.callback` as an Oauth redirect URL
+    1. Add `http://localhost:8585/auth/slack.callback` as an Oauth redirect URL
     1. Ensure that the bot token scope contains at least `users:read`
 1. Run `make up`. This will download dependencies, build and launch a development version of Outline
 

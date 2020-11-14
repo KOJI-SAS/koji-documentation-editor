@@ -55,8 +55,8 @@ type EmailJob = {
  * To preview emails, add a new preview to `emails/index.js` if they
  * require additional data (properties). Otherwise preview will work automatically.
  *
- * HTML: http://localhost:3000/email/:email_type/html
- * TEXT: http://localhost:3000/email/:email_type/text
+ * HTML: http://localhost:8585/email/:email_type/html
+ * TEXT: http://localhost:8585/email/:email_type/text
  */
 export class Mailer {
   transporter: ?any;

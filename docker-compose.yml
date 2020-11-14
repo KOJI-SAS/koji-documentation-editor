@@ -37,7 +37,7 @@ services:
       args:
         pull: 1
     ports:
-      - "3000:3000"
+      - "8585:8585"
     volumes:
       - .:/opt/outline
     depends_on:

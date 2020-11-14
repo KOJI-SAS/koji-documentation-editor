@@ -22,7 +22,7 @@ const colors = {
   black05: "rgba(0, 0, 0, 0.05)",
   black10: "rgba(0, 0, 0, 0.1)",
   black50: "rgba(0, 0, 0, 0.50)",
-  primary: "#39732e",
+  primary: "#63ba54",
   yellow: "#FBCA04",
   warmGrey: "#EDF2F7",
 

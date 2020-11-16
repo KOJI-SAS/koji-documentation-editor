@@ -42,6 +42,8 @@ router.post("attachments.create", auth(), async (ctx) => {
   const endpoint = publicS3Endpoint();
   const url = `${endpoint}/${key}`;
 
+  console.log(url);
+
   if (documentId) {
     const document = await Document.findByPk(documentId, { userId: user.id });
     authorize(user, "update", document);
@@ -109,6 +111,8 @@ router.post("attachments.redirect", auth(), async (ctx) => {
       });
       authorize(user, "read", document);
     }
+
+    console.log(attachment.key);
 
     const accessUrl = await getSignedImageUrl(attachment.key);
     ctx.redirect(accessUrl);

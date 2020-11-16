@@ -84,9 +84,9 @@ export const publicS3Endpoint = (isServerUpload?: boolean) => {
     "localhost:"
   ).replace(/\/$/, "");
 
-  return `${host}/${
-    isServerUpload && isDocker ? "s3/" : ""
-  }${AWS_S3_UPLOAD_BUCKET_NAME}`;
+  return `${host}${isServerUpload && isDocker ? "/s3/" : ""}${
+    AWS_S3_FORCE_PATH_STYLE ? `/${AWS_S3_UPLOAD_BUCKET_NAME}` : ""
+  }`;
 };
 
 export const uploadToS3FromBuffer = async (
@@ -133,7 +133,7 @@ export const uploadToS3FromUrl = async (
       .promise();
 
     const endpoint = publicS3Endpoint(true);
-    return `${endpoint}/${key}`;
+    return `${endpoint}${key}`;
   } catch (err) {
     if (process.env.SENTRY_DSN) {
       Sentry.captureException(err);
@@ -160,6 +160,12 @@ export const getSignedImageUrl = async (key: string) => {
     Key: key,
     Expires: 60,
   };
+
+  console.log(
+    isDocker,
+    `${publicS3Endpoint()}/${key}`,
+    s3.getSignedUrl("getObject", params)
+  );
 
   return isDocker
     ? `${publicS3Endpoint()}/${key}`

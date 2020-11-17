@@ -122,7 +122,8 @@ const StyledEditor = styled(RichMarkdownEditor)`
   .ProseMirror {
     > p,
     > blockquote,
-    > .code-block {
+    > .code-block,
+    > ul {
       margin-bottom: 10px;
     }
 

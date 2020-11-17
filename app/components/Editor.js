@@ -119,6 +119,20 @@ const StyledEditor = styled(RichMarkdownEditor)`
     }
   }
 
+  .ProseMirror {
+    > p {
+      margin-bottom: 10px;
+    }
+    code {
+      color: ${(props) => props.theme.primary};
+
+      .function {
+        font-weight: 600;
+        color: ${(props) => props.theme.yellow};
+      }
+    }
+  }
+
   p {
     a {
       color: ${(props) => props.theme.text};

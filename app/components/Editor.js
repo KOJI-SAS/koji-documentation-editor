@@ -120,16 +120,15 @@ const StyledEditor = styled(RichMarkdownEditor)`
   }
 
   .ProseMirror {
-    > p {
+    > p,
+    > blockquote,
+    > .code-block {
       margin-bottom: 10px;
     }
-    code {
-      color: ${(props) => props.theme.primary};
 
-      .function {
-        font-weight: 600;
-        color: ${(props) => props.theme.yellow};
-      }
+    *:not(pre) > code {
+      color: ${(props) => props.theme.primary};
+      font-weight: 600;
     }
   }
 
@@ -160,6 +159,4 @@ const Span = styled.span`
 
 const EditorWithRouterAndTheme = withRouter(withTheme(Editor));
 
-export default React.forwardRef<Props, typeof Editor>((props, ref) => (
-  <EditorWithRouterAndTheme {...props} forwardedRef={ref} />
-));
+export default React.forwardRef<Props, typeof Editor>((props, ref) => <EditorWithRouterAndTheme {...props} forwardedRef={ref} />);

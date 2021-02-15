@@ -6,13 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useMenuState, MenuButton } from "reakit/Menu";
 import styled from "styled-components";
-import {
-  developers,
-  changelog,
-  githubIssuesUrl,
-  mailToUrl,
-  settings,
-} from "shared/utils/routeHelpers";
+import { githubIssuesUrl, settings } from "shared/utils/routeHelpers";
 import KeyboardShortcuts from "scenes/KeyboardShortcuts";
 import ContextMenu from "components/ContextMenu";
 import MenuItem, { MenuAnchor } from "components/ContextMenu/MenuItem";
@@ -96,16 +90,6 @@ function AccountMenu(props: Props) {
         </MenuItem>
         <MenuItem {...menu} onClick={() => setKeyboardShortcutsOpen(true)}>
           {t("Keyboard shortcuts")}
-        </MenuItem>
-        <MenuItem {...menu} href={developers()} target="_blank">
-          {t("API documentation")}
-        </MenuItem>
-        <Separator {...menu} />
-        <MenuItem {...menu} href={changelog()} target="_blank">
-          {t("Changelog")}
-        </MenuItem>
-        <MenuItem {...menu} href={mailToUrl()} target="_blank">
-          {t("Send us feedback")}
         </MenuItem>
         <MenuItem {...menu} href={githubIssuesUrl()} target="_blank">
           {t("Report a bug")}

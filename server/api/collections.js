@@ -30,7 +30,14 @@ const { authorize } = policy;
 const router = new Router();
 
 router.post("collections.create", auth(), async (ctx) => {
-  const { name, color, description, icon } = ctx.body;
+  const {
+    name,
+    color,
+    description,
+    sharing,
+    icon,
+    sort = Collection.DEFAULT_SORT,
+  } = ctx.body;
   const isPrivate = ctx.body.private;
   ctx.assertPresent(name, "name is required");
 
@@ -47,8 +54,10 @@ router.post("collections.create", auth(), async (ctx) => {
     icon,
     color,
     teamId: user.teamId,
-    creatorId: user.id,
+    createdById: user.id,
     private: isPrivate,
+    sharing,
+    sort,
   });
 
   await Event.create({
@@ -445,16 +454,14 @@ router.post("collections.export_all", auth(), async (ctx) => {
 });
 
 router.post("collections.update", auth(), async (ctx) => {
-  const { id, name, description, icon, color } = ctx.body;
+  let { id, name, description, icon, color, sort, sharing } = ctx.body;
   const isPrivate = ctx.body.private;
-  ctx.assertPresent(name, "name is required");
 
   if (color) {
     ctx.assertHexColor(color, "Invalid hex value (please use format #FFFFFF)");
   }
 
   const user = ctx.state.user;
-
   const collection = await Collection.scope({
     method: ["withMembership", user.id],
   }).findByPk(id);
@@ -478,11 +485,27 @@ router.post("collections.update", auth(), async (ctx) => {
 
   const isPrivacyChanged = isPrivate !== collection.private;
 
-  collection.name = name;
-  collection.description = description;
-  collection.icon = icon;
-  collection.color = color;
-  collection.private = isPrivate;
+  if (name !== undefined) {
+    collection.name = name;
+  }
+  if (description !== undefined) {
+    collection.description = description;
+  }
+  if (icon !== undefined) {
+    collection.icon = icon;
+  }
+  if (color !== undefined) {
+    collection.color = color;
+  }
+  if (isPrivate !== undefined) {
+    collection.private = isPrivate;
+  }
+  if (sharing !== undefined) {
+    collection.sharing = sharing;
+  }
+  if (sort !== undefined) {
+    collection.sort = sort;
+  }
 
   await collection.save();
 

@@ -2,8 +2,9 @@
 import { sortBy, keyBy } from "lodash";
 import { observer, inject } from "mobx-react";
 import * as React from "react";
+import styled from "styled-components";
+import breakpoint from "styled-components-breakpoint";
 import { MAX_AVATAR_DISPLAY } from "shared/constants";
-
 import DocumentPresenceStore from "stores/DocumentPresenceStore";
 import ViewsStore from "stores/ViewsStore";
 import Document from "models/Document";
@@ -20,7 +21,9 @@ type Props = {
 @observer
 class Collaborators extends React.Component<Props> {
   componentDidMount() {
-    this.props.views.fetchPage({ documentId: this.props.document.id });
+    if (!this.props.document.isDeleted) {
+      this.props.views.fetchPage({ documentId: this.props.document.id });
+    }
   }
 
   render() {
@@ -49,7 +52,7 @@ class Collaborators extends React.Component<Props> {
     const overflow = documentViews.length - mostRecentViewers.length;
 
     return (
-      <Facepile
+      <FacepileHiddenOnMobile
         users={mostRecentViewers.map((v) => v.user)}
         overflow={overflow}
         renderAvatar={(user) => {
@@ -72,5 +75,11 @@ class Collaborators extends React.Component<Props> {
     );
   }
 }
+
+const FacepileHiddenOnMobile = styled(Facepile)`
+  ${breakpoint("mobile", "tablet")`
+    display: none;
+  `};
+`;
 
 export default inject("views", "presence")(Collaborators);

@@ -69,6 +69,7 @@ const Team = sequelize.define(
     slackData: DataTypes.JSONB,
   },
   {
+    paranoid: true,
     getterMethods: {
       url() {
         if (this.domain) {
@@ -143,7 +144,8 @@ Team.prototype.provisionFirstCollection = async function (userId) {
     description:
       "This collection is a quick guide to what Outline is all about. Feel free to delete this collection once your team is up to speed with the basics!",
     teamId: this.id,
-    creatorId: userId,
+    createdById: userId,
+    sort: Collection.DEFAULT_SORT,
   });
 
   // For the first collection we go ahead and create some intitial documents to get
@@ -173,13 +175,13 @@ Team.prototype.provisionFirstCollection = async function (userId) {
       parentDocumentId: null,
       collectionId: collection.id,
       teamId: collection.teamId,
-      userId: collection.creatorId,
-      lastModifiedById: collection.creatorId,
-      createdById: collection.creatorId,
+      userId: collection.createdById,
+      lastModifiedById: collection.createdById,
+      createdById: collection.createdById,
       title,
       text,
     });
-    await document.publish();
+    await document.publish(collection.createdById);
   }
 };
 
@@ -203,15 +205,6 @@ Team.prototype.removeAdmin = async function (user: User) {
   } else {
     throw new ValidationError("At least one admin is required");
   }
-};
-
-Team.prototype.suspendUser = async function (user: User, admin: User) {
-  if (user.id === admin.id)
-    throw new ValidationError("Unable to suspend the current user");
-  return user.update({
-    suspendedById: admin.id,
-    suspendedAt: new Date(),
-  });
 };
 
 Team.prototype.activateUser = async function (user: User, admin: User) {

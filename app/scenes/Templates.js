@@ -1,71 +1,65 @@
 // @flow
-import { observer, inject } from "mobx-react";
+import { observer } from "mobx-react";
+import { TemplateIcon } from "outline-icons";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { type Match } from "react-router-dom";
-
-import DocumentsStore from "stores/DocumentsStore";
-import Actions, { Action } from "components/Actions";
-import CenteredContent from "components/CenteredContent";
+import { Action } from "components/Actions";
 import Empty from "components/Empty";
 import Heading from "components/Heading";
-import PageTitle from "components/PageTitle";
 import PaginatedDocumentList from "components/PaginatedDocumentList";
+import Scene from "components/Scene";
 import Tab from "components/Tab";
 import Tabs from "components/Tabs";
+import useStores from "hooks/useStores";
 import NewTemplateMenu from "menus/NewTemplateMenu";
 
 type Props = {
-  documents: DocumentsStore,
   match: Match,
 };
 
-@observer
-class Templates extends React.Component<Props> {
-  render() {
-    const {
-      fetchTemplates,
-      templates,
-      templatesAlphabetical,
-    } = this.props.documents;
-    const { sort } = this.props.match.params;
+function Templates(props: Props) {
+  const { documents } = useStores();
+  const { t } = useTranslation();
+  const { fetchTemplates, templates, templatesAlphabetical } = documents;
+  const { sort } = props.match.params;
 
-    return (
-      <CenteredContent column auto>
-        <PageTitle title="Templates" />
-        <Heading>Templates</Heading>
-        <PaginatedDocumentList
-          heading={
-            <Tabs>
-              <Tab to="/templates" exact>
-                Recently Updated
-              </Tab>
-              <Tab to="/templates/alphabetical" exact>
-                Alphabetical
-              </Tab>
-            </Tabs>
-          }
-          empty={
-            <Empty>
-              There are no templates just yet. You can create templates to help
-              your team create consistent and accurate documentation.
-            </Empty>
-          }
-          fetch={fetchTemplates}
-          documents={
-            sort === "alphabetical" ? templatesAlphabetical : templates
-          }
-          showCollection
-          showDraft
-        />
-
-        <Actions align="center" justify="flex-end">
-          <Action>
-            <NewTemplateMenu />
-          </Action>
-        </Actions>
-      </CenteredContent>
-    );
-  }
+  return (
+    <Scene
+      icon={<TemplateIcon color="currentColor" />}
+      title={t("Templates")}
+      actions={
+        <Action>
+          <NewTemplateMenu />
+        </Action>
+      }
+    >
+      <Heading>{t("Templates")}</Heading>
+      <PaginatedDocumentList
+        heading={
+          <Tabs>
+            <Tab to="/templates" exact>
+              {t("Recently updated")}
+            </Tab>
+            <Tab to="/templates/alphabetical" exact>
+              {t("Alphabetical")}
+            </Tab>
+          </Tabs>
+        }
+        empty={
+          <Empty>
+            {t(
+              "There are no templates just yet. You can create templates to help your team create consistent and accurate documentation."
+            )}
+          </Empty>
+        }
+        fetch={fetchTemplates}
+        documents={sort === "alphabetical" ? templatesAlphabetical : templates}
+        showCollection
+        showDraft
+      />
+    </Scene>
+  );
 }
 
-export default inject("documents")(Templates);
+export default observer(Templates);

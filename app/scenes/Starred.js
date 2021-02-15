@@ -1,63 +1,68 @@
 // @flow
-import { observer, inject } from "mobx-react";
+import { observer } from "mobx-react";
+import { StarredIcon } from "outline-icons";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { type Match } from "react-router-dom";
-
-import DocumentsStore from "stores/DocumentsStore";
-import Actions, { Action } from "components/Actions";
-import CenteredContent from "components/CenteredContent";
+import { Action } from "components/Actions";
 import Empty from "components/Empty";
 import Heading from "components/Heading";
 import InputSearch from "components/InputSearch";
-import PageTitle from "components/PageTitle";
 import PaginatedDocumentList from "components/PaginatedDocumentList";
+import Scene from "components/Scene";
 import Tab from "components/Tab";
 import Tabs from "components/Tabs";
+import useStores from "hooks/useStores";
 import NewDocumentMenu from "menus/NewDocumentMenu";
 
 type Props = {
-  documents: DocumentsStore,
   match: Match,
 };
 
-@observer
-class Starred extends React.Component<Props> {
-  render() {
-    const { fetchStarred, starred, starredAlphabetical } = this.props.documents;
-    const { sort } = this.props.match.params;
+function Starred(props: Props) {
+  const { documents } = useStores();
+  const { t } = useTranslation();
+  const { fetchStarred, starred, starredAlphabetical } = documents;
+  const { sort } = props.match.params;
 
-    return (
-      <CenteredContent column auto>
-        <PageTitle title="Starred" />
-        <Heading>Starred</Heading>
-        <PaginatedDocumentList
-          heading={
-            <Tabs>
-              <Tab to="/starred" exact>
-                Recently Updated
-              </Tab>
-              <Tab to="/starred/alphabetical" exact>
-                Alphabetical
-              </Tab>
-            </Tabs>
-          }
-          empty={<Empty>You’ve not starred any documents yet.</Empty>}
-          fetch={fetchStarred}
-          documents={sort === "alphabetical" ? starredAlphabetical : starred}
-          showCollection
-        />
-
-        <Actions align="center" justify="flex-end">
+  return (
+    <Scene
+      icon={<StarredIcon color="currentColor" />}
+      title={t("Starred")}
+      actions={
+        <>
           <Action>
-            <InputSearch source="starred" />
+            <InputSearch
+              source="starred"
+              label={t("Search documents")}
+              labelHidden
+            />
           </Action>
           <Action>
             <NewDocumentMenu />
           </Action>
-        </Actions>
-      </CenteredContent>
-    );
-  }
+        </>
+      }
+    >
+      <Heading>{t("Starred")}</Heading>
+      <PaginatedDocumentList
+        heading={
+          <Tabs>
+            <Tab to="/starred" exact>
+              {t("Recently updated")}
+            </Tab>
+            <Tab to="/starred/alphabetical" exact>
+              {t("Alphabetical")}
+            </Tab>
+          </Tabs>
+        }
+        empty={<Empty>{t("You’ve not starred any documents yet.")}</Empty>}
+        fetch={fetchStarred}
+        documents={sort === "alphabetical" ? starredAlphabetical : starred}
+        showCollection
+      />
+    </Scene>
+  );
 }
 
-export default inject("documents")(Starred);
+export default observer(Starred);

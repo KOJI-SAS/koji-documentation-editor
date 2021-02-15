@@ -1,41 +1,42 @@
 // @flow
-import { observer, inject } from "mobx-react";
+import { observer } from "mobx-react";
 import {
   ArchiveIcon,
   EditIcon,
   GoToIcon,
-  MoreIcon,
   PadlockIcon,
   ShapesIcon,
   TrashIcon,
 } from "outline-icons";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import breakpoint from "styled-components-breakpoint";
-
-import CollectionsStore from "stores/CollectionsStore";
 import Document from "models/Document";
 import CollectionIcon from "components/CollectionIcon";
 import Flex from "components/Flex";
-import BreadcrumbMenu from "./BreadcrumbMenu";
+import useStores from "hooks/useStores";
+import BreadcrumbMenu from "menus/BreadcrumbMenu";
 import { collectionUrl } from "utils/routeHelpers";
 
-type Props = {
+type Props = {|
   document: Document,
-  collections: CollectionsStore,
+  children?: React.Node,
   onlyText: boolean,
-};
+|};
 
 function Icon({ document }) {
+  const { t } = useTranslation();
+
   if (document.isDeleted) {
     return (
       <>
-        <CollectionName to="/trash">
+        <CategoryName to="/trash">
           <TrashIcon color="currentColor" />
           &nbsp;
-          <span>Trash</span>
-        </CollectionName>
+          <span>{t("Trash")}</span>
+        </CategoryName>
         <Slash />
       </>
     );
@@ -43,11 +44,11 @@ function Icon({ document }) {
   if (document.isArchived) {
     return (
       <>
-        <CollectionName to="/archive">
+        <CategoryName to="/archive">
           <ArchiveIcon color="currentColor" />
           &nbsp;
-          <span>Archive</span>
-        </CollectionName>
+          <span>{t("Archive")}</span>
+        </CategoryName>
         <Slash />
       </>
     );
@@ -55,11 +56,11 @@ function Icon({ document }) {
   if (document.isDraft) {
     return (
       <>
-        <CollectionName to="/drafts">
+        <CategoryName to="/drafts">
           <EditIcon color="currentColor" />
           &nbsp;
-          <span>Drafts</span>
-        </CollectionName>
+          <span>{t("Drafts")}</span>
+        </CategoryName>
         <Slash />
       </>
     );
@@ -67,11 +68,11 @@ function Icon({ document }) {
   if (document.isTemplate) {
     return (
       <>
-        <CollectionName to="/templates">
+        <CategoryName to="/templates">
           <ShapesIcon color="currentColor" />
           &nbsp;
-          <span>Templates</span>
-        </CollectionName>
+          <span>{t("Templates")}</span>
+        </CategoryName>
         <Slash />
       </>
     );
@@ -79,20 +80,25 @@ function Icon({ document }) {
   return null;
 }
 
-const Breadcrumb = observer(({ document, collections, onlyText }: Props) => {
+const Breadcrumb = ({ document, children, onlyText }: Props) => {
+  const { collections } = useStores();
+  const { t } = useTranslation();
+
+  if (!collections.isLoaded) {
+    return <Wrapper />;
+  }
+
   let collection = collections.get(document.collectionId);
   if (!collection) {
-    if (!document.deletedAt) return <div />;
-
     collection = {
       id: document.collectionId,
-      name: "Deleted Collection",
+      name: t("Deleted Collection"),
       color: "currentColor",
     };
   }
 
   const path = collection.pathToDocument
-    ? collection.pathToDocument(document).slice(0, -1)
+    ? collection.pathToDocument(document.id).slice(0, -1)
     : [];
 
   if (onlyText === true) {
@@ -128,7 +134,7 @@ const Breadcrumb = observer(({ document, collections, onlyText }: Props) => {
       </CollectionName>
       {isNestedDocument && (
         <>
-          <Slash /> <BreadcrumbMenu label={<Overflow />} path={menuPath} />
+          <Slash /> <BreadcrumbMenu path={menuPath} />
         </>
       )}
       {lastPath && (
@@ -139,9 +145,15 @@ const Breadcrumb = observer(({ document, collections, onlyText }: Props) => {
           </Crumb>
         </>
       )}
+      {children}
     </Wrapper>
   );
-});
+};
+
+export const Slash = styled(GoToIcon)`
+  flex-shrink: 0;
+  fill: ${(props) => props.theme.divider};
+`;
 
 const Wrapper = styled(Flex)`
   display: none;
@@ -163,22 +175,6 @@ const SmallSlash = styled(GoToIcon)`
   opacity: 0.25;
 `;
 
-export const Slash = styled(GoToIcon)`
-  flex-shrink: 0;
-  fill: ${(props) => props.theme.divider};
-`;
-
-const Overflow = styled(MoreIcon)`
-  flex-shrink: 0;
-  transition: opacity 100ms ease-in-out;
-  fill: ${(props) => props.theme.divider};
-
-  &:active,
-  &:hover {
-    fill: ${(props) => props.theme.text};
-  }
-`;
-
 const Crumb = styled(Link)`
   color: ${(props) => props.theme.text};
   font-size: 15px;
@@ -194,12 +190,21 @@ const Crumb = styled(Link)`
 
 const CollectionName = styled(Link)`
   display: flex;
-  flex-shrink: 0;
+  flex-shrink: 1;
   color: ${(props) => props.theme.text};
   font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
+  min-width: 0;
+
+  svg {
+    flex-shrink: 0;
+  }
 `;
 
-export default inject("collections")(Breadcrumb);
+const CategoryName = styled(CollectionName)`
+  flex-shrink: 0;
+`;
+
+export default observer(Breadcrumb);

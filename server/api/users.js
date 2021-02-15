@@ -1,6 +1,7 @@
 // @flow
 import Router from "koa-router";
 import userInviter from "../commands/userInviter";
+import userSuspender from "../commands/userSuspender";
 import auth from "../middlewares/authentication";
 import { Event, User, Team } from "../models";
 import policy from "../policies";
@@ -54,6 +55,17 @@ router.post("users.list", auth(), pagination(), async (ctx) => {
   };
 });
 
+router.post("users.count", auth(), async (ctx) => {
+  const { user } = ctx.state;
+  const counts = await User.getCounts(user.teamId);
+
+  ctx.body = {
+    data: {
+      counts,
+    },
+  };
+});
+
 router.post("users.info", auth(), async (ctx) => {
   ctx.body = {
     data: presentUser(ctx.state.user),
@@ -62,10 +74,11 @@ router.post("users.info", auth(), async (ctx) => {
 
 router.post("users.update", auth(), async (ctx) => {
   const { user } = ctx.state;
-  const { name, avatarUrl } = ctx.body;
+  const { name, avatarUrl, language } = ctx.body;
 
   if (name) user.name = name;
   if (avatarUrl) user.avatarUrl = avatarUrl;
+  if (language) user.language = language;
 
   await user.save();
 
@@ -135,23 +148,15 @@ router.post("users.demote", auth(), async (ctx) => {
 });
 
 router.post("users.suspend", auth(), async (ctx) => {
-  const admin = ctx.state.user;
   const userId = ctx.body.id;
-  const teamId = ctx.state.user.teamId;
   ctx.assertPresent(userId, "id is required");
 
   const user = await User.findByPk(userId);
   authorize(ctx.state.user, "suspend", user);
 
-  const team = await Team.findByPk(teamId);
-  await team.suspendUser(user, admin);
-
-  await Event.create({
-    name: "users.suspend",
+  await userSuspender({
+    user,
     actorId: ctx.state.user.id,
-    userId,
-    teamId,
-    data: { name: user.name },
     ip: ctx.request.ip,
   });
 

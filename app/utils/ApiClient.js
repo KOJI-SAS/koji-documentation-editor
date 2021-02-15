@@ -1,20 +1,28 @@
 // @flow
 import invariant from "invariant";
 import { map, trim } from "lodash";
+import { getCookie } from "tiny-cookie";
 import stores from "stores";
 import download from "./download";
 import {
   AuthorizationError,
+  BadRequestError,
   NetworkError,
   NotFoundError,
   OfflineError,
   RequestError,
+  ServiceUnavailableError,
   UpdateRequiredError,
 } from "./errors";
 
 type Options = {
   baseUrl?: string,
 };
+
+// authorization cookie set by a Cloudflare Access proxy
+const CF_AUTHORIZATION = getCookie("CF_Authorization");
+// if the cookie is set, we must pass it with all ApiClient requests
+const CREDENTIALS = CF_AUTHORIZATION ? "same-origin" : "omit";
 
 class ApiClient {
   baseUrl: string;
@@ -89,7 +97,7 @@ class ApiClient {
         body,
         headers,
         redirect: "follow",
-        credentials: "omit",
+        credentials: CREDENTIALS,
         cache: "no-cache",
       });
     } catch (err) {
@@ -109,6 +117,8 @@ class ApiClient {
       ).split("filename=")[1];
 
       download(blob, trim(fileName, '"'));
+      return;
+    } else if (success && response.status === 204) {
       return;
     } else if (success) {
       return response.json();
@@ -139,12 +149,20 @@ class ApiClient {
       throw new UpdateRequiredError(error.message);
     }
 
+    if (response.status === 400) {
+      throw new BadRequestError(error.message);
+    }
+
     if (response.status === 403) {
       throw new AuthorizationError(error.message);
     }
 
     if (response.status === 404) {
       throw new NotFoundError(error.message);
+    }
+
+    if (response.status === 503) {
+      throw new ServiceUnavailableError(error.message);
     }
 
     throw new RequestError(error.message);

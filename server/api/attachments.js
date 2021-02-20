@@ -128,29 +128,29 @@ router.post("attachments.delete", auth(), async (ctx) => {
 
 router.post("attachments.redirect", auth(), async (ctx) => {
   const { id } = ctx.body;
-  ctx.assertPresent(id, "id is required");
+  // ctx.assertPresent(id, "id is required");
 
-  const user = ctx.state.user;
+  // const user = ctx.state.user;
   const attachment = await Attachment.findByPk(id);
   if (!attachment) {
     throw new NotFoundError();
   }
 
-  if (attachment.isPrivate) {
-    if (attachment.documentId) {
-      const document = await Document.findByPk(attachment.documentId, {
-        userId: user.id,
-      });
-      authorize(user, "read", document);
-    }
+  // if (attachment.isPrivate) {
+  //   if (attachment.documentId) {
+  //     const document = await Document.findByPk(attachment.documentId, {
+  //       userId: user.id,
+  //     });
+  //     authorize(user, "read", document);
+  //   }
 
-    console.log(attachment.key);
+  //   console.log(attachment.key);
 
-    const accessUrl = await getSignedImageUrl(attachment.key);
-    ctx.redirect(accessUrl);
-  } else {
-    ctx.redirect(attachment.url);
-  }
+  //   const accessUrl = await getSignedImageUrl(attachment.key);
+  //   ctx.redirect(accessUrl);
+  // } else {
+  ctx.redirect(attachment.url);
+  // }
 });
 
 export default router;

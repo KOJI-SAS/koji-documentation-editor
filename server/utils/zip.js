@@ -7,19 +7,30 @@ import { Attachment, Collection, Document } from "../models";
 import { presentCollection } from "../presenters";
 import { getImageByKey } from "./s3";
 
+/**
+ * Increase headings levels present in markdown content.
+ *
+ * @param content Markdown content.
+ */
+export function increaseHeading(content: string): string {
+  return content.replace(/^(#+) (.*)$/gm, "$1# $2");
+}
+
 async function addToArchive(zip, documents, parentDocument) {
+  let result = parentDocument ? parentDocument.title + "\n\n" : "";
+
   for (const [index, doc] of documents.entries()) {
     const document = await Document.findByPk(doc.id);
 
-    const metadata = {
-      position: index,
-      category: `'${parentDocument ? parentDocument.title : ""}'`,
-      title: `'${doc.title}'`,
-    };
-    const data = Object.keys(metadata).map((key) => `${key}: ${metadata[key]}`);
-    let text = ["---", ...data, "---", "\n"].join("\n");
+    // const metadata = {
+    //   position: index,
+    //   category: `'${parentDocument ? parentDocument.title : ""}'`,
+    //   title: `'${doc.title}'`,
+    // };
+    // const data = Object.keys(metadata).map((key) => `${key}: ${metadata[key]}`);
+    // let text = ["---", ...data, "---", "\n"].join("\n");
 
-    text += document.toMarkdown();
+    let text = document.toMarkdown();
 
     const attachments = await Attachment.findAll({
       where: { documentId: document.id },
@@ -28,15 +39,23 @@ async function addToArchive(zip, documents, parentDocument) {
     for (const attachment of attachments) {
       await addImageToArchive(zip, attachment.key);
       // text = text.replace(attachment.redirectUrl, encodeURI(attachment.key));
+      text = text.replace(
+        attachment.redirectUrl,
+        `https://docs.koji-dev.com${attachment.redirectUrl}`
+      );
     }
 
+    result += increaseHeading(text);
     zip.file(`${document.title || "Untitled"}.md`, text);
 
     if (doc.children && doc.children.length) {
       const folder = zip.folder(document.title);
       await addToArchive(folder, doc.children, doc);
     }
+
+    zip.file(`${document.title || "Untitled"}.md`, text);
   }
+  zip.file(`${parentDocument ? parentDocument.title : "Untitled"}.md`, result);
 }
 
 async function addImageToArchive(zip, key) {

@@ -14,7 +14,7 @@ export function increaseHeading(content: string): string {
   return content.replace(/^(#+) (.*)$/gm, "$1# $2");
 }
 
-async function addToArchive(zip, documents, parentDocument) {
+async function addToArchive(zip, documents, parentDocument, headings) {
   let result = parentDocument ? `# ${parentDocument.title}\n` : "";
 
   for (const [index, doc] of documents.entries()) {
@@ -33,13 +33,18 @@ async function addToArchive(zip, documents, parentDocument) {
       );
     }
 
-    result += increaseHeading(text);
+    result += text;
     zip.file(`${document.title || "Untitled"}.md`, text);
 
     if (doc.children && doc.children.length) {
       const folder = zip.folder(document.title);
-      const subText = await addToArchive(folder, doc.children, doc);
-      text += subText;
+      const subText = await addToArchive(
+        folder,
+        doc.children,
+        doc,
+        !!parentDocument
+      );
+      text += headings ? increaseHeading(subText) : subText;
     }
 
     zip.file(`${document.title || "Untitled"}.md`, text);

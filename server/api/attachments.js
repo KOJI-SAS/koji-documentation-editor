@@ -126,7 +126,7 @@ router.post("attachments.delete", auth(), async (ctx) => {
   };
 });
 
-router.post("attachments.redirect", auth(), async (ctx) => {
+router.post("attachments.redirect", async (ctx) => {
   const { id } = ctx.body;
   // ctx.assertPresent(id, "id is required");
 

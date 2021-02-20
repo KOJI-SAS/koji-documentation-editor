@@ -10,9 +10,6 @@ import { getImageByKey } from "./s3";
 async function addToArchive(zip, documents, parentDocument) {
   for (const [index, doc] of documents.entries()) {
     const document = await Document.findByPk(doc.id);
-    let text = document.toMarkdown();
-
-    text = text.split("\n").splice(2).join("\n");
 
     const metadata = {
       position: index,
@@ -20,7 +17,9 @@ async function addToArchive(zip, documents, parentDocument) {
       title: `'${doc.title}'`,
     };
     const data = Object.keys(metadata).map((key) => `${key}: ${metadata[key]}`);
-    text = ["---", ...data, "---", "\n"].join("\n");
+    let text = ["---", ...data, "---", "\n"].join("\n");
+
+    text += document.toMarkdown();
 
     const attachments = await Attachment.findAll({
       where: { documentId: document.id },
@@ -28,7 +27,7 @@ async function addToArchive(zip, documents, parentDocument) {
 
     for (const attachment of attachments) {
       await addImageToArchive(zip, attachment.key);
-      text = text.replace(attachment.redirectUrl, encodeURI(attachment.key));
+      // text = text.replace(attachment.redirectUrl, encodeURI(attachment.key));
     }
 
     zip.file(`${document.title || "Untitled"}.md`, text);

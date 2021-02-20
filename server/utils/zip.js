@@ -15,7 +15,7 @@ export function increaseHeading(content: string): string {
 }
 
 async function addToArchive(zip, documents, parentDocument) {
-  let result = parentDocument ? `# ${parentDocument.title}\n\n` : "";
+  let result = "";
 
   for (const [index, doc] of documents.entries()) {
     const document = await Document.findByPk(doc.id);

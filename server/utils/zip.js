@@ -1,11 +1,9 @@
 // @flow
 import fs from "fs";
-import * as Sentry from "@sentry/node";
 import JSZip from "jszip";
 import tmp from "tmp";
 import { Attachment, Collection, Document } from "../models";
 import { presentCollection } from "../presenters";
-import { getImageByKey } from "./s3";
 
 /**
  * Increase headings levels present in markdown content.
@@ -17,18 +15,10 @@ export function increaseHeading(content: string): string {
 }
 
 async function addToArchive(zip, documents, parentDocument) {
-  let result = parentDocument ? parentDocument.title + "\n\n" : "";
+  let result = parentDocument ? `# ${parentDocument.title}\n\n` : "";
 
   for (const [index, doc] of documents.entries()) {
     const document = await Document.findByPk(doc.id);
-
-    // const metadata = {
-    //   position: index,
-    //   category: `'${parentDocument ? parentDocument.title : ""}'`,
-    //   title: `'${doc.title}'`,
-    // };
-    // const data = Object.keys(metadata).map((key) => `${key}: ${metadata[key]}`);
-    // let text = ["---", ...data, "---", "\n"].join("\n");
 
     let text = document.toMarkdown();
 
@@ -37,8 +27,6 @@ async function addToArchive(zip, documents, parentDocument) {
     });
 
     for (const attachment of attachments) {
-      await addImageToArchive(zip, attachment.key);
-      // text = text.replace(attachment.redirectUrl, encodeURI(attachment.key));
       text = text.replace(
         attachment.redirectUrl,
         `https://docs.koji-dev.com${attachment.redirectUrl}`
@@ -50,25 +38,15 @@ async function addToArchive(zip, documents, parentDocument) {
 
     if (doc.children && doc.children.length) {
       const folder = zip.folder(document.title);
-      await addToArchive(folder, doc.children, doc);
+      const subText = await addToArchive(folder, doc.children, doc);
+      text += subText;
     }
 
     zip.file(`${document.title || "Untitled"}.md`, text);
   }
   zip.file(`${parentDocument ? parentDocument.title : "Untitled"}.md`, result);
-}
 
-async function addImageToArchive(zip, key) {
-  try {
-    const img = await getImageByKey(key);
-    zip.file(key, img, { createFolders: true });
-  } catch (err) {
-    if (process.env.SENTRY_DSN) {
-      Sentry.captureException(err);
-    }
-    // error during file retrieval
-    console.error(err);
-  }
+  return result;
 }
 
 async function archiveToPath(zip) {
